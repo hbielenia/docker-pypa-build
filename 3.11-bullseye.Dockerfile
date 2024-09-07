@@ -10,6 +10,6 @@
 
 FROM python:3.11-bullseye@sha256:c927121ba6f075a139438db25b22e0c21df8ecae790958f5f3764c32e3c25834
 WORKDIR /usr/src/app
-RUN python -m pip install git+https://github.com/pypa/build.git@1e67c062e9d1b1a6d5ffed621f4b29902bb764e5
+RUN python -m pip install git+https://github.com/pypa/build.git@3b0b5d07077473f5da3f038cf7b74cd2b65d2a98
 RUN adduser --disabled-password --no-create-home --uid 1000 build
 USER 1000:1000

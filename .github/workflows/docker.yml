@@ -23,9 +23,10 @@ on:
       - '3.11-bullseye.Dockerfile'
       - './github/workflows/docker.yml'
 env:
-  BUILD_VERSION: '1.2.1'
-  PYTHON_VERSION_MAJOR: '3.11'
-  PYTHON_VERSION_MINOR: '9'
+  BUILD_VERSION_MINOR: '1.2'
+  BUILD_VERSION_PATCH: '2'
+  PYTHON_VERSION_MINOR: '3.11'
+  PYTHON_VERSION_PATCH: '9'
   DEBIAN_VERSION: 'bullseye'
   DOCKERHUB_REPO: ${{ vars.DOCKERHUB_USERNAME }}/pypa-build
   GHCR_REPO: ghcr.io/${{ github.repository }}
@@ -46,7 +47,7 @@ jobs:
         with:
           push: false
           load: true
-          file: ${{ env.PYTHON_VERSION_MAJOR }}-${{ env.DEBIAN_VERSION }}.Dockerfile
+          file: ${{ env.PYTHON_VERSION_MINOR }}-${{ env.DEBIAN_VERSION }}.Dockerfile
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
           tags: ${{ env.DOCKERHUB_REPO }}:latest
@@ -91,19 +92,29 @@ jobs:
         uses: docker/build-push-action@4f7cdeb0f05278b464e71357394bf2c61f94138e # 6.6.0
         with:
           push: true
-          file: ${{ env.PYTHON_VERSION_MAJOR }}-${{ env.DEBIAN_VERSION }}.Dockerfile
+          file: ${{ env.PYTHON_VERSION_MINOR }}-${{ env.DEBIAN_VERSION }}.Dockerfile
           cache-from: type=local,src=/tmp/.buildx-cache
           platforms: linux/amd64
           tags: >-
             ${{ env.DOCKERHUB_REPO }}:latest,
-            ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION }},
-            ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION }}-py${{ env.PYTHON_VERSION_MAJOR }},
-            ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION }}-py${{ env.PYTHON_VERSION_MAJOR }}-${{ env.DEBIAN_VERSION }},
-            ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION }}-py${{ env.PYTHON_VERSION_MAJOR }}.${{ env.PYTHON_VERSION_MINOR }},
-            ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION }}-py${{ env.PYTHON_VERSION_MAJOR }}.${{ env.PYTHON_VERSION_MINOR }}-${{ env.DEBIAN_VERSION }},
+            ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION_MINOR }},
+            ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION_MINOR }}-py${{ env.PYTHON_VERSION_MINOR }},
+            ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION_MINOR }}-py${{ env.PYTHON_VERSION_MINOR }}-${{ env.DEBIAN_VERSION }},
+            ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION_MINOR }}-py${{ env.PYTHON_VERSION_MINOR }}.${{ env.PYTHON_VERSION_PATCH }},
+            ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION_MINOR }}-py${{ env.PYTHON_VERSION_MINOR }}.${{ env.PYTHON_VERSION_PATCH }}-${{ env.DEBIAN_VERSION }},
+            ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION_MINOR }}.${{ env.BUILD_VERSION_PATCH }},
+            ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION_MINOR }}.${{ env.BUILD_VERSION_PATCH }}-py${{ env.PYTHON_VERSION_MINOR }},
+            ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION_MINOR }}.${{ env.BUILD_VERSION_PATCH }}-py${{ env.PYTHON_VERSION_MINOR }}-${{ env.DEBIAN_VERSION }},
+            ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION_MINOR }}.${{ env.BUILD_VERSION_PATCH }}-py${{ env.PYTHON_VERSION_MINOR }}.${{ env.PYTHON_VERSION_PATCH }},
+            ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION_MINOR }}.${{ env.BUILD_VERSION_PATCH }}-py${{ env.PYTHON_VERSION_MINOR }}.${{ env.PYTHON_VERSION_PATCH }}-${{ env.DEBIAN_VERSION }},
             ${{ env.GHCR_REPO }}:latest,
-            ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION }},
-            ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION }}-py${{ env.PYTHON_VERSION_MAJOR }},
-            ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION }}-py${{ env.PYTHON_VERSION_MAJOR }}-${{ env.DEBIAN_VERSION }},
-            ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION }}-py${{ env.PYTHON_VERSION_MAJOR }}.${{ env.PYTHON_VERSION_MINOR }},
-            ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION }}-py${{ env.PYTHON_VERSION_MAJOR }}.${{ env.PYTHON_VERSION_MINOR }}-${{ env.DEBIAN_VERSION }},
+            ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION_MINOR }},
+            ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION_MINOR }}-py${{ env.PYTHON_VERSION_MINOR }},
+            ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION_MINOR }}-py${{ env.PYTHON_VERSION_MINOR }}-${{ env.DEBIAN_VERSION }},
+            ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION_MINOR }}-py${{ env.PYTHON_VERSION_MINOR }}.${{ env.PYTHON_VERSION_PATCH }},
+            ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION_MINOR }}-py${{ env.PYTHON_VERSION_MINOR }}.${{ env.PYTHON_VERSION_PATCH }}-${{ env.DEBIAN_VERSION }},
+            ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION_MINOR }}.${{ env.BUILD_VERSION_PATCH }},
+            ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION_MINOR }}.${{ env.BUILD_VERSION_PATCH }}-py${{ env.PYTHON_VERSION_MINOR }},
+            ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION_MINOR }}.${{ env.BUILD_VERSION_PATCH }}-py${{ env.PYTHON_VERSION_MINOR }}-${{ env.DEBIAN_VERSION }},
+            ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION_MINOR }}.${{ env.BUILD_VERSION_PATCH }}-py${{ env.PYTHON_VERSION_MINOR }}.${{ env.PYTHON_VERSION_PATCH }},
+            ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION_MINOR }}.${{ env.BUILD_VERSION_PATCH }}-py${{ env.PYTHON_VERSION_MINOR }}.${{ env.PYTHON_VERSION_PATCH }}-${{ env.DEBIAN_VERSION }},

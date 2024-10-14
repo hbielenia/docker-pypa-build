@@ -8,7 +8,7 @@
 # You should have received a copy of the CC0 Public Domain Dedication along with this software.
 # If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-FROM python:3.11-bullseye@sha256:c927121ba6f075a139438db25b22e0c21df8ecae790958f5f3764c32e3c25834
+FROM python:3.11-bullseye@sha256:476e5a29a42407305014dac3288bfbc92f26628843c32da9acc453a1e6bd03bf
 WORKDIR /usr/src/app
 RUN python -m pip install git+https://github.com/pypa/build.git@3b0b5d07077473f5da3f038cf7b74cd2b65d2a98
 RUN adduser --disabled-password --no-create-home --uid 1000 build

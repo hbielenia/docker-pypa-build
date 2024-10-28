@@ -1,9 +1,8 @@
 =================
 docker-pypa-build
 =================
-This repository holds configuration for building `Python's Docker image`_
-with `pypa/build`_ installed. Currently it supports only the
-``3.11-bullseye`` platform.
+Configuration for automated builds of `Python's Docker image`_
+with `pypa/build`_ installed.
 
 This project is not affiliated in any way with `PyPA`_. PyPA is mentioned
 in several places alongside ``build`` because *build* is a very generic
@@ -14,6 +13,17 @@ Download
 Images built from this repository are available from `Docker Hub`_ as
 `hbielenia/pypa-build`_ and from `GitHub Container Registry`_
 as ``ghcr.io/hbielenia/docker-pypa-build``.
+
+Images
+======
+The currently built images are:
+- ``1.2-py3.12``, also tagged ``1.2-py3.12-bullseye``, ``1.2-py3.12.7``,
+  ``1.2-py3.12.7-bullseye``, ``1.2.2-py3.12``, ``1.2.2-py3.12-bullseye``,
+  ``1.2.2-py3.12.7``, ``1.2.2-py3.12.7-bullseye``, ``1.2.2``, ``1.2``
+  and ``latest``.
+- ``1.2-py3.11``, also tagged ``1.2-py3.11-bullseye``, ``1.2-py3.11.10``,
+  ``1.2-py3.11.10-bullseye``, ``1.2.2-py3.11``, ``1.2.2-py3.11-bullseye``,
+  ``1.2.2-py3.11.10`` and ``1.2.2-py3.11.10-bullseye``.
 
 Usage
 =====

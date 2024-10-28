@@ -8,57 +8,39 @@
 
 name: docker
 on:
-  push:
-    branches:
-      - 'master'
-    paths:
-      - '3.11-bullseye.Dockerfile'
-      - '.github/workflows/docker.yml'
-  pull_request:
-    types:
-      - opened
-      - synchronize
-      - ready_for_review
-      - reopened
-    paths:
-      - '3.11-bullseye.Dockerfile'
-      - '.github/workflows/docker.yml'
+  workflow_call:
+    inputs:
+      latest:
+        type: boolean
+        default: false
+      push:
+        type: boolean
+        default: false
+      python_version_major:
+        type: number
+        default: 3
+      python_version_minor:
+        type: number
+        required: true
+      python_version_patch:
+        type: number
+        required: true
 env:
   BUILD_VERSION_MINOR: '1.2'
   BUILD_VERSION_PATCH: '2'
-  PYTHON_VERSION_MINOR: '3.11'
-  PYTHON_VERSION_PATCH: '9'
-  DEBIAN_VERSION: 'bullseye'
+  PYTHON_VERSION: '${{ inputs.python_version_major }}.${{ inputs.python_version_minor }}'
+  DEBIAN_VERSION: bullseye
   DOCKERHUB_REPO: ${{ vars.DOCKERHUB_USERNAME }}/pypa-build
   GHCR_REPO: ghcr.io/${{ github.repository }}
 jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-      - name: Set up Docker BuildX
-        uses: docker/setup-buildx-action@988b5a0280414f521da01fcc63a27aeeb4b104db # 3.6.1
-      - name: Set up cache
-        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # 4.0.2
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-buildx-
       - name: Build Docker image
-        uses: docker/build-push-action@4f7cdeb0f05278b464e71357394bf2c61f94138e # 6.6.0
+        uses: hbielenia/docker-build-action@7211d36e8ed0a62e6ef2f8610b734896e93d8190 # 0.2.0
         with:
-          push: false
-          load: true
-          file: ${{ env.PYTHON_VERSION_MINOR }}-${{ env.DEBIAN_VERSION }}.Dockerfile
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+          dockerfile: ./dockerfiles/${{ env.DEBIAN_VERSION }}/python-${{ env.PYTHON_VERSION }}.Dockerfile
           tags: ${{ env.DOCKERHUB_REPO }}:latest
-      - name: Force cache refresh
-        # Fix for:
-        # https://github.com/docker/build-push-action/issues/252
-        # https://github.com/moby/buildkit/issues/1896
-        run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
       - name: Checkout repository
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # 4.1.7
         with:
@@ -66,18 +48,10 @@ jobs:
       - name: Run test script
         run: ./test_image.sh
   upload:
-    if: github.event_name == 'push'
+    if: inputs.push
     needs: build
     runs-on: ubuntu-22.04
     steps:
-      - name: Set up Docker BuildX
-        uses: docker/setup-buildx-action@988b5a0280414f521da01fcc63a27aeeb4b104db # 3.6.1
-      - name: Set up cache
-        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # 4.0.2
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          fail-on-cache-miss: true # We only want to tag and push image that should be already built.
       - name: Log in to Docker Hub
         uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # 3.3.0
         with:
@@ -89,33 +63,40 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build Docker image
-        uses: docker/build-push-action@4f7cdeb0f05278b464e71357394bf2c61f94138e # 6.6.0
+      - name: Push Docker image
+        uses: hbielenia/docker-build-action@7211d36e8ed0a62e6ef2f8610b734896e93d8190 # 0.2.0
         with:
-          push: true
-          file: ${{ env.PYTHON_VERSION_MINOR }}-${{ env.DEBIAN_VERSION }}.Dockerfile
-          cache-from: type=local,src=/tmp/.buildx-cache
-          platforms: linux/amd64
+          dockerfile: ./dockerfiles/${{ env.DEBIAN_VERSION }}/python-${{ env.PYTHON_VERSION }}.Dockerfile
+          from_cache: '1'
+          push: '1'
+          tags: >-
+            ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION_MINOR }}-py${{ env.PYTHON_VERSION }},
+            ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION_MINOR }}-py${{ env.PYTHON_VERSION }}-${{ env.DEBIAN_VERSION }},
+            ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION_MINOR }}-py${{ env.PYTHON_VERSION }}.${{ inputs.python_version_patch }},
+            ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION_MINOR }}-py${{ env.PYTHON_VERSION }}.${{ inputs.python_version_patch }}-${{ env.DEBIAN_VERSION }},
+            ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION_MINOR }}.${{ env.BUILD_VERSION_PATCH }}-py${{ env.PYTHON_VERSION }},
+            ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION_MINOR }}.${{ env.BUILD_VERSION_PATCH }}-py${{ env.PYTHON_VERSION }}-${{ env.DEBIAN_VERSION }},
+            ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION_MINOR }}.${{ env.BUILD_VERSION_PATCH }}-py${{ env.PYTHON_VERSION }}.${{ inputs.python_version_patch }},
+            ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION_MINOR }}.${{ env.BUILD_VERSION_PATCH }}-py${{ env.PYTHON_VERSION }}.${{ inputs.python_version_patch }}-${{ env.DEBIAN_VERSION }},
+            ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION_MINOR }}-py${{ env.PYTHON_VERSION }},
+            ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION_MINOR }}-py${{ env.PYTHON_VERSION }}-${{ env.DEBIAN_VERSION }},
+            ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION_MINOR }}-py${{ env.PYTHON_VERSION }}.${{ inputs.python_version_patch }},
+            ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION_MINOR }}-py${{ env.PYTHON_VERSION }}.${{ inputs.python_version_patch }}-${{ env.DEBIAN_VERSION }},
+            ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION_MINOR }}.${{ env.BUILD_VERSION_PATCH }}-py${{ env.PYTHON_VERSION }},
+            ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION_MINOR }}.${{ env.BUILD_VERSION_PATCH }}-py${{ env.PYTHON_VERSION }}-${{ env.DEBIAN_VERSION }},
+            ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION_MINOR }}.${{ env.BUILD_VERSION_PATCH }}-py${{ env.PYTHON_VERSION }}.${{ inputs.python_version_patch }},
+            ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION_MINOR }}.${{ env.BUILD_VERSION_PATCH }}-py${{ env.PYTHON_VERSION }}.${{ inputs.python_version_patch }}-${{ env.DEBIAN_VERSION }},
+      - name: Push generic tags
+        if: inputs.latest
+        uses: hbielenia/docker-build-action@0468dce5e94349f188c5e7f68ef5295333ec25b4 # 0.1.0
+        with:
+          dockerfile: ./dockerfiles/${{ env.DEBIAN_VERSION }}/python-${{ env.PYTHON_VERSION }}.Dockerfile
+          from_cache: '1'
+          push: '1'
           tags: >-
             ${{ env.DOCKERHUB_REPO }}:latest,
             ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION_MINOR }},
-            ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION_MINOR }}-py${{ env.PYTHON_VERSION_MINOR }},
-            ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION_MINOR }}-py${{ env.PYTHON_VERSION_MINOR }}-${{ env.DEBIAN_VERSION }},
-            ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION_MINOR }}-py${{ env.PYTHON_VERSION_MINOR }}.${{ env.PYTHON_VERSION_PATCH }},
-            ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION_MINOR }}-py${{ env.PYTHON_VERSION_MINOR }}.${{ env.PYTHON_VERSION_PATCH }}-${{ env.DEBIAN_VERSION }},
             ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION_MINOR }}.${{ env.BUILD_VERSION_PATCH }},
-            ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION_MINOR }}.${{ env.BUILD_VERSION_PATCH }}-py${{ env.PYTHON_VERSION_MINOR }},
-            ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION_MINOR }}.${{ env.BUILD_VERSION_PATCH }}-py${{ env.PYTHON_VERSION_MINOR }}-${{ env.DEBIAN_VERSION }},
-            ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION_MINOR }}.${{ env.BUILD_VERSION_PATCH }}-py${{ env.PYTHON_VERSION_MINOR }}.${{ env.PYTHON_VERSION_PATCH }},
-            ${{ env.DOCKERHUB_REPO }}:${{ env.BUILD_VERSION_MINOR }}.${{ env.BUILD_VERSION_PATCH }}-py${{ env.PYTHON_VERSION_MINOR }}.${{ env.PYTHON_VERSION_PATCH }}-${{ env.DEBIAN_VERSION }},
             ${{ env.GHCR_REPO }}:latest,
             ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION_MINOR }},
-            ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION_MINOR }}-py${{ env.PYTHON_VERSION_MINOR }},
-            ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION_MINOR }}-py${{ env.PYTHON_VERSION_MINOR }}-${{ env.DEBIAN_VERSION }},
-            ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION_MINOR }}-py${{ env.PYTHON_VERSION_MINOR }}.${{ env.PYTHON_VERSION_PATCH }},
-            ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION_MINOR }}-py${{ env.PYTHON_VERSION_MINOR }}.${{ env.PYTHON_VERSION_PATCH }}-${{ env.DEBIAN_VERSION }},
             ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION_MINOR }}.${{ env.BUILD_VERSION_PATCH }},
-            ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION_MINOR }}.${{ env.BUILD_VERSION_PATCH }}-py${{ env.PYTHON_VERSION_MINOR }},
-            ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION_MINOR }}.${{ env.BUILD_VERSION_PATCH }}-py${{ env.PYTHON_VERSION_MINOR }}-${{ env.DEBIAN_VERSION }},
-            ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION_MINOR }}.${{ env.BUILD_VERSION_PATCH }}-py${{ env.PYTHON_VERSION_MINOR }}.${{ env.PYTHON_VERSION_PATCH }},
-            ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION_MINOR }}.${{ env.BUILD_VERSION_PATCH }}-py${{ env.PYTHON_VERSION_MINOR }}.${{ env.PYTHON_VERSION_PATCH }}-${{ env.DEBIAN_VERSION }},

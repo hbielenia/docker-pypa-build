@@ -28,6 +28,7 @@ on:
 jobs:
   image:
     uses: ./.github/workflows/docker.yml
+    secrets: inherit
     with:
       python_version_minor: 11
       python_version_patch: 10

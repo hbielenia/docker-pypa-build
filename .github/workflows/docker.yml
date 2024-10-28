@@ -88,7 +88,7 @@ jobs:
             ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION_MINOR }}.${{ env.BUILD_VERSION_PATCH }}-py${{ env.PYTHON_VERSION }}.${{ inputs.python_version_patch }}-${{ env.DEBIAN_VERSION }},
       - name: Push generic tags
         if: inputs.latest
-        uses: hbielenia/docker-build-action@0468dce5e94349f188c5e7f68ef5295333ec25b4 # 0.1.0
+        uses: hbielenia/docker-build-action@7211d36e8ed0a62e6ef2f8610b734896e93d8190 # 0.2.0
         with:
           dockerfile: ./dockerfiles/${{ env.DEBIAN_VERSION }}/python-${{ env.PYTHON_VERSION }}.Dockerfile
           from_cache: '1'

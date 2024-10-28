@@ -32,3 +32,4 @@ jobs:
       latest: true
       python_version_minor: 12
       python_version_patch: 7
+      push: ${{ github.event_name == 'push' }}

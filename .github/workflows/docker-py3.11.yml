@@ -31,3 +31,4 @@ jobs:
     with:
       python_version_minor: 11
       python_version_patch: 10
+      push: ${{ github.event_name == 'push' }}

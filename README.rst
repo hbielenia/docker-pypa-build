@@ -17,6 +17,7 @@ as ``ghcr.io/hbielenia/docker-pypa-build``.
 Images
 ======
 The currently built images are:
+
 - ``1.2-py3.12``, also tagged ``1.2-py3.12-bullseye``, ``1.2-py3.12.7``,
   ``1.2-py3.12.7-bullseye``, ``1.2.2-py3.12``, ``1.2.2-py3.12-bullseye``,
   ``1.2.2-py3.12.7``, ``1.2.2-py3.12.7-bullseye``, ``1.2.2``, ``1.2``

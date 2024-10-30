@@ -42,7 +42,7 @@ jobs:
           dockerfile: ./dockerfiles/${{ env.DEBIAN_VERSION }}/python-${{ env.PYTHON_VERSION }}.Dockerfile
           tags: ${{ env.DOCKERHUB_REPO }}:latest
       - name: Checkout repository
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # 4.1.7
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # 4.2.2
         with:
           persist-credentials: false
       - name: Run test script

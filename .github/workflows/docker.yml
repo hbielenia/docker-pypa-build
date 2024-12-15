@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Build Docker image
-        uses: hbielenia/docker-build-action@7211d36e8ed0a62e6ef2f8610b734896e93d8190 # 0.2.0
+        uses: hbielenia/docker-build-action@dfa079645a47a1ba3d4323ec3f5aa4ad8ed8f003 # 0.2.2
         with:
           dockerfile: ./dockerfiles/${{ env.DEBIAN_VERSION }}/python-${{ env.PYTHON_VERSION }}.Dockerfile
           tags: ${{ env.DOCKERHUB_REPO }}:latest
@@ -64,7 +64,7 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Push Docker image
-        uses: hbielenia/docker-build-action@7211d36e8ed0a62e6ef2f8610b734896e93d8190 # 0.2.0
+        uses: hbielenia/docker-build-action@dfa079645a47a1ba3d4323ec3f5aa4ad8ed8f003 # 0.2.2
         with:
           dockerfile: ./dockerfiles/${{ env.DEBIAN_VERSION }}/python-${{ env.PYTHON_VERSION }}.Dockerfile
           from_cache: '1'
@@ -88,7 +88,7 @@ jobs:
             ${{ env.GHCR_REPO }}:${{ env.BUILD_VERSION_MINOR }}.${{ env.BUILD_VERSION_PATCH }}-py${{ env.PYTHON_VERSION }}.${{ inputs.python_version_patch }}-${{ env.DEBIAN_VERSION }},
       - name: Push generic tags
         if: inputs.latest
-        uses: hbielenia/docker-build-action@7211d36e8ed0a62e6ef2f8610b734896e93d8190 # 0.2.0
+        uses: hbielenia/docker-build-action@dfa079645a47a1ba3d4323ec3f5aa4ad8ed8f003 # 0.2.2
         with:
           dockerfile: ./dockerfiles/${{ env.DEBIAN_VERSION }}/python-${{ env.PYTHON_VERSION }}.Dockerfile
           from_cache: '1'
